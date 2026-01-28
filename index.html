@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Cosmetic - Nos Produits</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --vert-nature: #009245;
+            --bleu-eclat: #0076BC;
+            --vert-clair: #A8E063;
+            --gris-clair: #F5F5F5;
+            --blanc: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, var(--gris-clair) 0%, #ffffff 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--vert-nature) 0%, var(--bleu-eclat) 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 146, 69, 0.2);
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            color: var(--blanc);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--blanc);
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (min-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid {
+                gap: 1rem;
+            }
+        }
+
+        /* Mobile: afficher un seul produit par ligne pour petits écrans */
+        @media (max-width: 600px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .product-image-wrapper {
+                padding: 1rem;
+                min-height: 180px;
+            }
+
+            .product-image {
+                height: 160px;
+            }
+
+            .product-info {
+                padding: 1rem;
+            }
+
+            .product-name {
+                font-size: 1.05rem;
+            }
+
+            .product-description {
+                font-size: 0.9rem;
+                -webkit-line-clamp: 3;
+                line-clamp: 3;
+            }
+
+            .order-btn {
+                padding: 0.8rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .product-card {
+            background: var(--blanc);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0, 146, 69, 0.25);
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(168, 224, 99, 0.1) 0%, rgba(0, 146, 69, 0.05) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+        }
+
+        .product-image-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(168, 224, 99, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(20px);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: var(--blanc);
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 90%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 2rem;
+            top: 2rem;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--vert-nature);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: none;
+            border: none;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: var(--bleu-eclat);
+            transform: scale(1.2);
+        }
+
+        .modal-product-name {
+            margin-top: 1.5rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            color: var(--vert-nature);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                padding: 1rem;
+                max-width: 95%;
+            }
+
+            .close-modal {
+                right: 1rem;
+                top: 1rem;
+                font-size: 1.5rem;
+                width: 40px;
+                height: 40px;
+            }
+
+            .modal-image {
+                max-height: 60vh;
+            }
+
+            .modal-product-name {
+                font-size: 1.2rem;
+                margin-top: 1rem;
+            }
+        }
+
+        .product-info {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem;
+            color: var(--vert-nature);
+            margin-bottom: 0.8rem;
+        }
+
+        .product-description {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .order-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--bleu-eclat);
+            color: var(--blanc);
+            border: none;
+            padding: 0.9rem 1.5rem;
+            border-radius: 50px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 118, 188, 0.3);
+        }
+
+        .order-btn:hover {
+            background: var(--vert-nature);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 146, 69, 0.4);
+        }
+
+        .order-btn::before {
+            content: '';
+            font-size: 1.2rem;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: var(--blanc);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.8rem;
+            color: var(--vert-clair);
+            margin-bottom: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .social-link {
+            color: var(--blanc);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            color: var(--vert-clair);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .product-name {
+                font-size: 1.1rem;
+            }
+
+            .product-description {
+                font-size: 0.85rem;
+                -webkit-line-clamp: 3;
+                line-clamp: 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Nos Produits</h1>
+        <p class="subtitle">Découvrez notre gamme de soins naturels signée A-Cosmetic.</p>
+    </header>
+
+    <div class="container">
+        <!-- SOIN DU VISAGE -->
+        <h2 style="font-family: 'Montserrat', sans-serif; color: var(--vert-nature); margin-bottom: 2rem; font-size: 2rem; border-bottom: 3px solid var(--vert-clair); padding-bottom: 1rem;">Soin du Visage</h2>
+        <div class="products-grid">
+            <!-- Crème de visage -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Soin du visage/Crème de visage.png" alt="Crème de visage" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Crème de Visage<br> 800F</h3>
+                    <p class="product-description">Crème nourrissante pour le soin et l'hydratation du visage.
+                    </p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Crème%20de%20visage." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- HYGIÈNE & BIEN-ÊTRE -->
+        <h2 style="font-family: 'Montserrat', sans-serif; color: var(--vert-nature); margin-bottom: 2rem; margin-top: 4rem; font-size: 2rem; border-bottom: 3px solid var(--vert-clair); padding-bottom: 1rem;">Hygiène & Bien-être</h2>
+        <div class="products-grid">
+            <!-- Gel Douche Gommant - Fraise 1L -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="./products%20copy/Hygi%C3%A8ne%20%26%20Bien-%C3%AAtre/Gel_Fraise_1L.png" alt="Gel Douche Gommant - Fraise" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Gommant - Fraise <br> 3000F</h3>
+                    <p class="product-description">1L - Gel douche exfoliant à base de fraise pour une peau douce et fraîche.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Gommant%20Fraise%201L." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Gommant - Papaye 1L -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="./products%20copy/Hygi%C3%A8ne%20%26%20Bien-%C3%AAtre/Gel_Papaye_1L.png" alt="Gel Douche Gommant - Papaye" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Gommant - Papaye <br> 3000F</h3>
+                    <p class="product-description">1L - Gel douche exfoliant à base de papaye pour une peau radieuse.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Gommant%20Papaye%201L." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Gommant - Carotte 1L -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="./products%20copy/Hygi%C3%A8ne%20%26%20Bien-%C3%AAtre/Gel_Carotte_1L.png" alt="Gel Douche Gommant - Carotte" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Gommant - Carotte <br> 3000F</h3>
+                    <p class="product-description">1L - Gel douche gommant à la carotte pour une peau nettoyée en profondeur.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Gommant%20Carotte%201L." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Gommant - Carotte -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Gel Douche Gommant - Carotte 500ml.png" alt="Gel Douche Gommant - Carotte" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Gommant - Carotte <br> 1200F</h3>
+                    <p class="product-description">500ml - Gel douche exfoliant à base de carotte pour une peau douce.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Gommant%20Carotte." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Gommant - Citron -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Gel Douche Gommant - Citron 500ml.png" alt="Gel Douche Gommant - Citron" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Gommant - Citron <br> 1200F</h3>
+                    <p class="product-description">500ml - Gel douche exfoliant au citron frais et tonifiant.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Gommant%20Citron." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Gommant - Jaune d'œuf -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Gel Douche Gommant - Jaune d'œuf 500ml.png" alt="Gel Douche Gommant - Jaune d'œuf" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Gommant - Jaune d'œuf <br> 1200F</h3>
+                    <p class="product-description">500ml - Gel douche nourrissant avec protéines naturelles.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Jaune%20d%27oeuf." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Mentholé -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Gel Douche Mentholé - 400ml.png" alt="Gel Douche Mentholé" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Mentholé <br> 600F</h3>
+                    <p class="product-description">400ml - Gel douche rafraîchissant au menthol naturel.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Menthol%C3%A9." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Médical -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Gel Douche Médical - 400ml.png" alt="Gel Douche Médical" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Médical <br> 700F</h3>
+                    <p class="product-description">500ml - Gel douche thérapeutique pour une hygiène optimale.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Médical." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Traitant - Citron -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Gel Douche Traitant - Citron 400ml.png" alt="Gel Douche Traitant - Citron" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Traitant - Citron <br> 600F</h3>
+                    <p class="product-description">400ml - Gel douche purifiant au citron pour un nettoyage en profondeur.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Traitant%20Citron." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Gel Douche Traitant - Carotte -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Gel Douche Traitant – Carotte 400 ml.png" alt="Gel Douche Traitant - Carotte" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Gel Douche Traitant - Carotte<br> 600F</h3>
+                    <p class="product-description">400ml - Gel douche régénérant à la carotte naturelle.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Gel%20Douche%20Traitant%20Carotte." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- O'cean Gel Intime -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/O'cean Gel Intime.png" alt="O'cean Gel Intime" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">O'cean Gel Intime<br> 600F</h3>
+                    <p class="product-description">Gel intime doux avec extraits marins naturels et respectueux.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20O%27cean%20Gel%20Intime." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Savon de Beauté Traitant - Carotte -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Savon de Beauté Traitant – Carotte 400 g.png" alt="Savon de Beauté Traitant - Carotte" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Savon de Beauté Traitant - Carotte <br> 650F</h3>
+                    <p class="product-description">400g - Savon artisanal enrichi à la carotte pour une peau lumineuse.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Savon%20Carotte%20400g." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Savon de Beauté Traitant - Jaune d'œuf -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="./products%20copy/Hygi%C3%A8ne%20%26%20Bien-%C3%AAtre/Savon_Jaune.png" alt="Savon de Beauté Traitant - Jaune d'œuf" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Savon de Beauté Traitant - Jaune d'œuf <br> 650F</h3>
+                    <p class="product-description">400g - Savon nourrissant aux protéines naturelles de l'œuf.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Savon%20Jaune%20d%27oeuf%20400g." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Savon de Beauté Traitant - Miel -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Savon de Beauté Traitant – Miel 400 g.png" alt="Savon de Beauté Traitant - Miel" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Savon de Beauté Traitant - Miel <br> 650F</h3>
+                    <p class="product-description">400g - Savon appaisant et adoucissant au miel pur.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Savon%20Miel%20400g." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Savon Traitant -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Hygiène & Bien-être/Savon Traitant - 250g.png" alt="Savon Traitant" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Savon Traitant <br> 250F</h3>
+                    <p class="product-description">250g - Savon artisanal de qualité supérieure à base d'ingrédients naturels.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Savon%20Traitant%20250g." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOINS CAPILLAIRES -->
+        <h2 style="font-family: 'Montserrat', sans-serif; color: var(--vert-nature); margin-bottom: 2rem; margin-top: 4rem; font-size: 2rem; border-bottom: 3px solid var(--vert-clair); padding-bottom: 1rem;">Soins Capillaires</h2>
+        <div class="products-grid">
+            <!-- Pommade pour Cheveux -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Soins capillaires/Pommade pour Cheveux.png" alt="Pommade pour Cheveux" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Pommade pour Cheveux <br> 300F</h3>
+                    <p class="product-description">Pommade brillante et nourrissante pour cheveux brillants et soyeux.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Pommade%20pour%20Cheveux." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOINS DU CORPS -->
+        <h2 style="font-family: 'Montserrat', sans-serif; color: var(--vert-nature); margin-bottom: 2rem; margin-top: 4rem; font-size: 2rem; border-bottom: 3px solid var(--vert-clair); padding-bottom: 1rem;">Soins du Corps</h2>
+        <div class="products-grid">
+            <!-- Crème Médicale -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Soins du corps/Crème Médicale.png" alt="Crème Médicale" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Crème Médicale <br> 300F</h3>
+                    <p class="product-description">Crème thérapeutique pour le soin complet du corps.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Cr%C3%A8me%20M%C3%A9dicale." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Lait de Beauté - Carotte -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Soins du corps/Lait de Beauté - Carotte.png" alt="Lait de Beauté - Carotte" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Lait de Beauté - Carotte<br> 1300F</h3>
+                    <p class="product-description">Lait hydratant au bêta-carotène pour une peau radieuse.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Lait%20Beauté%20Carotte." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Lait Médical -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Soins du corps/Lait Médical - 250ml.png" alt="Lait Médical" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Lait Médical<br> 600F</h3>
+                    <p class="product-description">250ml - Lait corporel aux propriétés apaisantes et régénérantes.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Lait%20M%C3%A9dical%20250ml." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- Savon de Soins Hydratant -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Soins du corps/Savon de Soins Hydratant - 225g.png" alt="Savon de Soins Hydratant" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Savon de Soins Hydratant<br> 250F</h3>
+                    <p class="product-description">225g - Savon ultra-hydratant pour une peau douce et nourrie.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Savon%20Hydratant%20225g." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+
+            <!-- visage5 -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Soins du corps/visage5.png" alt="Soin Visage Premium" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Lait de soin hydratant<br> 600F</h3>
+                    <p class="product-description">Lait de soin hydratant pour une peau d'exception.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Lait%20de%20soin%20hydratant." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- BIEN-ÊTRE & DÉTENTE -->
+        <h2 style="font-family: 'Montserrat', sans-serif; color: var(--vert-nature); margin-bottom: 2rem; margin-top: 4rem; font-size: 2rem; border-bottom: 3px solid var(--vert-clair); padding-bottom: 1rem;">Bien-être & Détente</h2>
+        <div class="products-grid">
+            <!-- Baume de Massage -->
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    <img src="products copy/Bien-être & détente/Baume de Massage.png" alt="Baume de Massage" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Baume de Massage</h3>
+                    <p class="product-description">Baume apaisante pour un massage relaxant et régénérant.</p>
+                    <a href="https://wa.me/22549133029?text=Bonjour%20A-Cosmetic%20👋,%20je%20souhaite%20commander%20Baume%20de%20Massage." class="order-btn" target="_blank">Commander</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">A-Cosmetic</div>
+            <p>Soins naturels pour une beauté authentique</p>
+            <p style="margin-top: 1.5rem; opacity: 0.7; font-size: 0.9rem;">© 2026 A-Cosmetic. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Modal pour les images -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <img id="modalImage" class="modal-image" src="" alt="Produit">
+            <h3 id="modalProductName" class="modal-product-name"></h3>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalProductName = document.getElementById('modalProductName');
+
+        // Ajouter les écouteurs de clic à toutes les images de produits
+        document.querySelectorAll('.product-image').forEach(img => {
+            img.addEventListener('click', function() {
+                openModal(this);
+            });
+        });
+
+        function openModal(imgElement) {
+            const productCard = imgElement.closest('.product-card');
+            const productName = productCard.querySelector('.product-name').textContent;
+            const imgSrc = imgElement.src;
+            
+            modalImage.src = imgSrc;
+            modalProductName.textContent = productName;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Fermer la modal en cliquant en dehors
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Fermer la modal avec la touche Echap
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
